@@ -1,59 +1,93 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# RMF Inventory - Sistema de Gestión de Stock Profesional
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+**RMF Inventory** es un ecosistema ERP Lite diseñado para la gestión avanzada de inventarios, desarrollado bajo el **stack TALL** (Tailwind v4, Alpine.js, Laravel 12, Livewire) y potenciado por **Filament**. 
 
-## About Laravel
+[cite_start]Este proyecto se enmarca en el desarrollo práctico de la asignatura **Programación Web** (4º curso - GITT) de la **ULPGC**[cite: 14]. [cite_start]Su objetivo principal es dar soporte a un desarrollo más sostenible, alineándose con el **Objetivo de Desarrollo Sostenible 12** (Producción y Consumo Responsables).
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+---
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## 🚀 Características del Sistema
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+* **Arquitectura Multipanel:** Separación estricta de responsabilidades entre el panel de Administración (`/admin`) y el panel Operativo (`/app`).
+* **Trazabilidad Total (Ledger-based):** El stock no es un valor estático; se calcula dinámicamente mediante el historial de movimientos, garantizando auditorías precisas.
+* **Diseño Moderno:** Implementación de **Tailwind CSS v4** mediante el plugin de Vite para una compilación de alto rendimiento y estilos "CSS-first".
+* **Seguridad Basada en Enums:** Uso de **Backed Enums** para la gestión de roles (`RoleType`) y tipos de movimientos (`StockMovementType`), evitando la rigidez de los ENUMs de base de datos tradicionales.
+* **Acceso Restringido:** Implementación de la interfaz `FilamentUser` en el modelo `User` para controlar el acceso cruzado entre paneles.
 
-## Learning Laravel
+---
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+## 🛠️ Stack Tecnológico
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+* **Framework:** Laravel 12.x
+* **Backend UI:** Filament v3/v4 (Arquitectura Desacoplada)
+* **Estilos:** Tailwind CSS v4 (Alpha/Beta) + PostCSS
+* **Interactividad:** Livewire v3
+* **Base de Datos:** SQLite (Entorno de desarrollo local)
+* **Compilación:** Vite 6 + Plugin Tailwind v4
 
-## Laravel Sponsors
+---
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+## 📂 Arquitectura de Código (Filament Pro Pattern)
 
-### Premium Partners
+Para garantizar la mantenibilidad, el proyecto utiliza un patrón de **desacoplamiento de componentes** en los recursos de Filament:
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+* **Schemas:** Clases dedicadas únicamente a la estructura de formularios (ej. `CategoryForm.php`).
+* **Tables:** Clases dedicadas a la configuración de listados y acciones (ej. `CategoriesTable.php`).
+* **Resources:** Actúan como directores de orquesta, gestionando rutas y permisos.
 
-## Contributing
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
 
-## Code of Conduct
+---
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+## 📊 Diseño de Datos (Bloque 6)
 
-## Security Vulnerabilities
+[cite_start]El diseño cumple con los requisitos de identificación de entidades y relaciones de integridad de la asignatura [cite: 151-153]:
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+| Entidad | Propósito | Atributos Clave |
+| :--- | :--- | :--- |
+| **User** | Gestión de acceso y auditoría. | `name`, `email`, `role` (Enum). |
+| **Category** | Organización jerárquica del catálogo. | `name`, `slug` (unique). |
+| **Product** | Definición técnica del inventario. | `sku` (unique), `prices`, `security_stock`. |
+| **Warehouse** | Gestión multialmacén. | `name`, `location`. |
+| **StockMovement** | Historial inmutable de existencias. | `quantity`, `type` (Enum), `user_id`. |
 
-## License
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+
+---
+
+## ⚙️ Instalación y Configuración
+
+1.  **Dependencias de Backend:**
+    ```bash
+    composer install
+    ```
+2.  **Dependencias de Frontend:**
+    ```bash
+    npm install
+    ```
+3.  **Configuración de Entorno:**
+    ```bash
+    cp .env.example .env
+    php artisan key:generate
+    ```
+4.  **Base de Datos y Datos de Prueba:**
+    ```bash
+    php artisan migrate --seed
+    ```
+5.  **Entorno de Desarrollo:**
+    * Terminal 1: `php artisan serve`
+    * Terminal 2: `npm run dev`
+
+---
+
+## 📅 Sprints del Proyecto (Práctica 1)
+
+* [cite_start]**B1 a B4:** Desarrollo básico, rutas Laravel y plantillas Blade[cite: 11].
+* [cite_start]**B5:** Introducción al proyecto global y creación del portal `miPortal/home` [cite: 146-148].
+* [cite_start]**B6:** Diseño de base de datos validado con el profesor [cite: 151-154].
+
+---
+
+**Desarrollador:** Roberto Morales Fumero
+**Curso:** 2025-2026
+**Institución:** Escuela de Ingeniería de Telecomunicación y Electrónica (EITE)
