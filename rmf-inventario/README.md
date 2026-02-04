@@ -1,8 +1,8 @@
 # RMF Inventory - Sistema de Gestión de Stock Profesional
 
-**RMF Inventory** es un ecosistema ERP Lite diseñado para la gestión avanzada de inventarios, desarrollado bajo el **stack TALL** (Tailwind v4, Alpine.js, Laravel 12, Livewire) y potenciado por **Filament**. 
+**RMF Inventory** es un ecosistema ERP Lite diseñado para la gestión avanzada de inventarios, desarrollado bajo el **Stack TALL** (Tailwind v4, Alpine.js, Laravel 12, Livewire) y potenciado por **Filament**. 
 
-[cite_start]Este proyecto se enmarca en el desarrollo práctico de la asignatura **Programación Web** (4º curso - GITT) de la **ULPGC**[cite: 14]. [cite_start]Su objetivo principal es dar soporte a un desarrollo más sostenible, alineándose con el **Objetivo de Desarrollo Sostenible 12** (Producción y Consumo Responsables).
+Este proyecto se enmarca en el desarrollo práctico de la asignatura **Programación Web** (4º curso - GITT) de la **ULPGC**. Su objetivo principal es dar soporte a un desarrollo más sostenible, alineándose con el **Objetivo de Desarrollo Sostenible 12** (Producción y Consumo Responsables).
 
 ---
 
@@ -41,7 +41,7 @@ Para garantizar la mantenibilidad, el proyecto utiliza un patrón de **desacopla
 
 ## 📊 Diseño de Datos (Bloque 6)
 
-[cite_start]El diseño cumple con los requisitos de identificación de entidades y relaciones de integridad de la asignatura [cite: 151-153]:
+El diseño cumple con los requisitos de identificación de entidades y relaciones de integridad de la asignatura:
 
 | Entidad | Propósito | Atributos Clave |
 | :--- | :--- | :--- |
@@ -77,14 +77,6 @@ Para garantizar la mantenibilidad, el proyecto utiliza un patrón de **desacopla
 5.  **Entorno de Desarrollo:**
     * Terminal 1: `php artisan serve`
     * Terminal 2: `npm run dev`
-
----
-
-## 📅 Sprints del Proyecto (Práctica 1)
-
-* [cite_start]**B1 a B4:** Desarrollo básico, rutas Laravel y plantillas Blade[cite: 11].
-* [cite_start]**B5:** Introducción al proyecto global y creación del portal `miPortal/home` [cite: 146-148].
-* [cite_start]**B6:** Diseño de base de datos validado con el profesor [cite: 151-154].
 
 ---
 
