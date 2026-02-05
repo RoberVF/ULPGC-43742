@@ -12,6 +12,7 @@ class StockMovement extends Model
         'product_id',
         'warehouse_id',
         'user_id',
+        'company_id',
         'quantity',
         'type',
         'reference'
@@ -34,6 +35,11 @@ class StockMovement extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function company(): BelongsTo
+    {
+        return $this->belongsTo(Company::class);
     }
 
     /**

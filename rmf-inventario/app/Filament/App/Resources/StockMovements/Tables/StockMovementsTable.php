@@ -2,10 +2,9 @@
 
 namespace App\Filament\App\Resources\StockMovements\Tables;
 
-use Filament\Actions\BulkActionGroup;
-use Filament\Actions\DeleteBulkAction;
-use Filament\Actions\EditAction;
 use Filament\Tables\Table;
+use Filament\Tables\Columns\TextColumn;
+use App\Enums\StockMovementType;
 
 class StockMovementsTable
 {
@@ -13,18 +12,37 @@ class StockMovementsTable
     {
         return $table
             ->columns([
-                //
+                TextColumn::make('created_at')
+                    ->label('Fecha')
+                    ->dateTime('d/m/Y H:i')
+                    ->sortable(),
+
+                TextColumn::make('product.name')
+                    ->label('Producto')
+                    ->searchable(),
+
+                TextColumn::make('warehouse.name')
+                    ->label('Almacén'),
+
+                TextColumn::make('type')
+                    ->label('Tipo')
+                    ->badge()
+                    ->color(fn (StockMovementType $state): string => match ($state) {
+                        StockMovementType::Entry => 'success',
+                        StockMovementType::Exit => 'danger',
+                        StockMovementType::Adjustment => 'warning',
+                    }),
+
+                TextColumn::make('quantity')
+                    ->label('Cantidad')
+                    ->numeric()
+                    ->weight('bold')
+                    ->color(fn ($record): string => $record->quantity >= 0 ? 'success' : 'danger'),
+
+                TextColumn::make('user.name')
+                    ->label('Registrado por')
+                    ->toggleable(isToggledHiddenByDefault: true),
             ])
-            ->filters([
-                //
-            ])
-            ->recordActions([
-                EditAction::make(),
-            ])
-            ->toolbarActions([
-                BulkActionGroup::make([
-                    DeleteBulkAction::make(),
-                ]),
-            ]);
+            ->defaultSort('created_at', 'desc');
     }
 }

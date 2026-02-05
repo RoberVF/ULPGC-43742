@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -10,6 +11,7 @@ class Product extends Model
 {
     protected $fillable = [
         'category_id',
+        'company_id',
         'sku',
         'name',
         'description',
@@ -27,6 +29,11 @@ class Product extends Model
     public function stockMovements(): HasMany
     {
         return $this->hasMany(StockMovement::class);
+    }
+
+    public function company(): BelongsTo
+    {
+        return $this->belongsTo(Company::class);
     }
 
     /**
@@ -51,5 +58,20 @@ class Product extends Model
     public function getFormattedPriceAttribute(): string
     {
         return number_format($this->sale_price, 2, ',', '.') . ' €';
+    }
+
+    protected static function booted()
+    {
+        static::addGlobalScope('ancient', function (Builder $builder) {
+            if (auth()->check() && auth()->user()->company_id) {
+                $builder->where('company_id', auth()->user()->company_id);
+            }
+        });
+
+        static::creating(function ($model) {
+            if (auth()->check() && auth()->user()->company_id) {
+                $model->company_id = auth()->user()->company_id;
+            }
+        });
     }
 }
