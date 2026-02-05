@@ -47,6 +47,26 @@ class ProductResource extends Resource
             ->withSum('stockMovements', 'quantity');
     }
 
+    public static function getNavigationBadge(): ?string
+    {
+        $count = static::getModel()::query()
+            ->withSum('stockMovements', 'quantity')
+            ->havingRaw('COALESCE(stock_movements_sum_quantity, 0) <= security_stock')
+            ->count();
+
+        return $count > 0 ? (string) $count : null;
+    }
+
+    public static function getNavigationBadgeColor(): ?string
+    {
+        return 'danger';
+    }
+
+    public static function getNavigationBadgeTooltip(): ?string
+    {
+        return 'Productos con stock bajo mínimos';
+    }
+
     public static function getPages(): array
     {
         return [
