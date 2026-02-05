@@ -10,7 +10,7 @@ use Filament\Tables\Columns\TextColumn;
 
 class LowStockProducts extends BaseWidget
 {
-    protected static ?int $sort = 2;
+    protected static ?int $sort = 5;
     protected int | string | array $columnSpan = 'full';
     protected static ?string $heading = '⚠️ Alerta de Reposición (Stock Bajo)';
 
