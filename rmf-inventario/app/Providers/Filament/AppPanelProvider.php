@@ -29,7 +29,7 @@ class AppPanelProvider extends PanelProvider
             ->path('app')
             ->tenant(Company::class, slugAttribute: 'slug')
             ->tenantMenu(true)
-            ->brandName('RMF Inventario - STAFF')
+            ->brandName('RMF Inventario')
             ->login()
             ->colors([
                 'primary' => Color::Blue,
