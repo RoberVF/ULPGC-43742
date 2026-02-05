@@ -60,6 +60,14 @@ class Product extends Model
         return number_format($this->sale_price, 2, ',', '.') . ' €';
     }
 
+    /**
+     * Accesor para obtener el stock actual del producto.
+     */
+    public function getStockAttribute(): int
+    {
+        return $this->stockMovements()->sum('quantity');
+    }
+
     protected static function booted()
     {
         static::addGlobalScope('ancient', function (Builder $builder) {
