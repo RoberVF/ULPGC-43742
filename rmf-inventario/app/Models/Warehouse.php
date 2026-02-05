@@ -3,12 +3,16 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Builder;
+use App\Traits\HasCompany;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Warehouse extends Model
 {
+    use HasCompany;
+
     protected $fillable = [
         'name',
         'location',
@@ -19,6 +23,11 @@ class Warehouse extends Model
     public function stockMovements(): HasMany
     {
         return $this->hasMany(StockMovement::class);
+    }
+
+    public function products(): BelongsToMany
+    {
+        return $this->belongsToMany(Product::class, 'stock_movements');
     }
 
     public function company(): BelongsTo
@@ -45,20 +54,5 @@ class Warehouse extends Model
             ->with('product')
             ->get()
             ->sum(fn($m) => $m->quantity * $m->product->purchase_price);
-    }
-
-    protected static function booted()
-    {
-        static::addGlobalScope('ancient', function (Builder $builder) {
-            if (auth()->check() && auth()->user()->company_id) {
-                $builder->where('company_id', auth()->user()->company_id);
-            }
-        });
-
-        static::creating(function ($model) {
-            if (auth()->check() && auth()->user()->company_id) {
-                $model->company_id = auth()->user()->company_id;
-            }
-        });
     }
 }

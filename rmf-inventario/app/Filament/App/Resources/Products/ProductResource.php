@@ -5,6 +5,7 @@ namespace App\Filament\App\Resources\Products;
 use App\Filament\App\Resources\Products\Pages\CreateProduct;
 use App\Filament\App\Resources\Products\Pages\EditProduct;
 use App\Filament\App\Resources\Products\Pages\ListProducts;
+use App\Filament\App\Resources\Products\RelationManagers\StockMovementsRelationManager;
 use App\Filament\App\Resources\Products\Schemas\ProductForm;
 use App\Filament\App\Resources\Products\Tables\ProductsTable;
 use App\Models\Product;
@@ -13,6 +14,7 @@ use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 
 class ProductResource extends Resource
 {
@@ -35,8 +37,14 @@ class ProductResource extends Resource
     public static function getRelations(): array
     {
         return [
-            //
+            StockMovementsRelationManager::class,
         ];
+    }
+
+    public static function getEloquentQuery(): Builder
+    {
+        return parent::getEloquentQuery()
+            ->withSum('stockMovements', 'quantity');
     }
 
     public static function getPages(): array
