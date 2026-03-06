@@ -45,7 +45,7 @@ class DatabaseSeeder extends Seeder
 
         DB::table('harvests')->insert([
             'producer_dni' => '12345678X',
-            'type_id' => 1,
+            'product_type_id' => 1,
             'collect_date' => now(),
             'quantity' => 500.00,
             'stock' => 500.00,

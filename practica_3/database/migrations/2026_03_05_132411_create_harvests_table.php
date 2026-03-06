@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('harvests', function (Blueprint $table) {
             $table->id();
             $table->string('producer_dni', 15);
-            $table->unsignedBigInteger('type_id');
+            $table->unsignedBigInteger('product_type_id');
             $table->date('collect_date');
             $table->decimal('quantity', 10, 2);
             $table->decimal('stock', 10, 2);
@@ -23,7 +23,7 @@ return new class extends Migration
             $table->decimal('temperature', 5, 2)->nullable();
             $table->decimal('humidity', 5, 2)->nullable();
             $table->foreign('producer_dni')->references('dni')->on('producers');
-            $table->foreign('type_id')->references('id')->on('product_types');
+            $table->foreign('product_type_id')->references('id')->on('product_types');
             $table->timestamps();
         });
     }
