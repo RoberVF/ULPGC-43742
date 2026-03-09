@@ -7,11 +7,15 @@
 </head>
 
 <body>
-    @include('components.nav')
+    <div class="mb-4">
+        @include('components.nav')
+    </div>
     <main>
         @yield('content')
     </main>
-    @include('components.footer')
+    <div class="mt-4">
+        @include('components.footer')
+    </div>
 </body>
 
 </html>
