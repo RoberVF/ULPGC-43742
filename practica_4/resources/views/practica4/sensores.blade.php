@@ -10,9 +10,14 @@
             <form id="sensor-form" class="space-y-4">
                 <div class="grid grid-cols-2 gap-4">
                     <div>
-                        <label class="block text-sm font-semibold text-gray-600">Seller DNI</label>
-                        <input type="text" id="sensor_id" class="w-full p-2 border rounded shadow-sm focus:ring-green-500"
-                            placeholder="Ej: 12345678A">
+                        <label class="block text-sm font-semibold text-gray-600">Vendedor (DNI)</label>
+                        <select id="sensor_id" class="w-full p-2 border rounded shadow-sm focus:ring-green-500">
+                            @foreach ($sellers as $seller)
+                                <option value="{{ $seller->dni }}">
+                                    {{ $seller->dni }} - {{ $seller->user->name ?? 'Vendedor' }}
+                                </option>
+                            @endforeach
+                        </select>
                     </div>
                     <div>
                         <label class="block text-sm font-semibold text-gray-600">Tipo de Sensor</label>
