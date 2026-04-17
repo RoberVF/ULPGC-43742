@@ -9,14 +9,28 @@ use Livewire\Volt\Component;
 new class extends Component {
     public string $name = '';
     public string $email = '';
+    public string $birth_date = '';
+    public bool $delivery = false;
+    public string $iban = '';
+    public string $cert_ods = '';
 
     /**
      * Mount the component.
      */
     public function mount(): void
     {
+        $user = Auth::user();
         $this->name = Auth::user()->name;
         $this->email = Auth::user()->email;
+        if ($user->client) {
+            $this->birth_date = $user->client->birth_date ?? '';
+        } elseif ($user->seller) {
+            $this->iban = $user->seller->iban ?? '';
+            $this->delivery = (bool) $user->seller->delivery;
+        } elseif ($user->producer) {
+            $this->iban = $user->producer->iban ?? '';
+            $this->cert_ods = $user->producer->cert_ods ?? '';
+        }
     }
 
     /**
@@ -28,24 +42,31 @@ new class extends Component {
 
         $validated = $this->validate([
             'name' => ['required', 'string', 'max:255'],
-
-            'email' => [
-                'required',
-                'string',
-                'lowercase',
-                'email',
-                'max:255',
-                Rule::unique(User::class)->ignore($user->id)
-            ],
+            'email' => ['required', 'string', 'lowercase', 'email', 'max:255', Rule::unique(User::class)->ignore($user->id)],
+            'birth_date' => ['nullable', 'date'],
+            'iban' => ['nullable', 'string', 'max:34'],
+            'cert_ods' => ['nullable', 'string', 'max:255'],
+            'delivery' => ['boolean'],
         ]);
 
-        $user->fill($validated);
+        $user->update([
+            'name' => $validated['name'],
+            'email' => $validated['email'],
+        ]);
 
-        if ($user->isDirty('email')) {
-            $user->email_verified_at = null;
+        if ($user->client) {
+            $user->client->update(['birth_date' => $this->birth_date]);
+        } elseif ($user->seller) {
+            $user->seller->update([
+                'iban' => $this->iban,
+                'delivery' => $this->delivery,
+            ]);
+        } elseif ($user->producer) {
+            $user->producer->update([
+                'iban' => $this->iban,
+                'cert_ods' => $this->cert_ods,
+            ]);
         }
-
-        $user->save();
 
         $this->dispatch('profile-updated', name: $user->name);
     }
@@ -74,20 +95,35 @@ new class extends Component {
 
     <x-settings.layout heading="Profile" subheading="Update your name and email address">
         <form wire:submit="updateProfileInformation" class="my-6 w-full space-y-6">
-            <flux:input wire:model="name" label="{{ __('Name') }}" type="text" name="name" required autofocus autocomplete="name" />
+            <flux:input wire:model="name" label="{{ __('Name') }}" type="text" name="name" required autofocus
+                autocomplete="name" />
+
+            @if (auth()->user()->client)
+                <flux:input wire:model="birth_date" label="Fecha de Nacimiento" type="date" />
+            @endif
+
+            @if (auth()->user()->seller)
+                <flux:input wire:model="iban" label="IBAN de la cuenta" placeholder="ES00 0000..." />
+                <flux:checkbox wire:model="delivery" label="Ofrezco servicio de delivery" />
+            @endif
+
+            @if (auth()->user()->producer)
+                <flux:input wire:model="iban" label="IBAN de la cuenta" placeholder="ES00 0000..." />
+                <flux:input wire:model="cert_ods" label="Certificado ODS"
+                    placeholder="Código o enlace al certificado" />
+            @endif
 
             <div>
-                <flux:input wire:model="email" label="{{ __('Email') }}" type="email" name="email" required autocomplete="email" />
+                <flux:input wire:model="email" label="{{ __('Email') }}" type="email" name="email" required
+                    autocomplete="email" />
 
-                @if (auth()->user() instanceof \Illuminate\Contracts\Auth\MustVerifyEmail &&! auth()->user()->hasVerifiedEmail())
+                @if (auth()->user() instanceof \Illuminate\Contracts\Auth\MustVerifyEmail && !auth()->user()->hasVerifiedEmail())
                     <div>
                         <p class="mt-2 text-sm text-gray-800">
                             {{ __('Your email address is unverified.') }}
 
-                            <button
-                                wire:click.prevent="resendVerificationNotification"
-                                class="rounded-md text-sm text-gray-600 underline hover:text-gray-900 focus:outline-hidden focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
-                            >
+                            <button wire:click.prevent="resendVerificationNotification"
+                                class="rounded-md text-sm text-gray-600 underline hover:text-gray-900 focus:outline-hidden focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
                                 {{ __('Click here to re-send the verification email.') }}
                             </button>
                         </p>

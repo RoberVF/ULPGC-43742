@@ -23,7 +23,10 @@ class User extends Authenticatable implements LunarUserInterface
     protected $fillable = [
         'name',
         'email',
+        'dni',
         'password',
+        'image_path',
+        'ubi',
     ];
 
     /**
@@ -47,5 +50,28 @@ class User extends Authenticatable implements LunarUserInterface
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
+    }
+
+    /**
+     * Genera las iniciales del usuario para el avatar.
+     */
+    public function initials(): string
+    {
+        return collect(explode(' ', $this->name))
+            ->map(fn($segment) => mb_substr($segment, 0, 1))
+            ->join('');
+    }
+
+    public function producer()
+    {
+        return $this->hasOne(Producer::class);
+    }
+    public function seller()
+    {
+        return $this->hasOne(Seller::class);
+    }
+    public function client()
+    {
+        return $this->hasOne(Client::class);
     }
 }

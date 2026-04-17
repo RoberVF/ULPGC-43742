@@ -6,11 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Client extends Model
 {
-    protected $table = 'clients';
-    protected $primaryKey = 'dni';
-    public $incrementing = false;
-    protected $keyType = 'string';
-    protected $fillable = ['dni'];
+    protected $fillable = ['dni', 'user_id', 'birth_date'];
 
     public function user()
     {
