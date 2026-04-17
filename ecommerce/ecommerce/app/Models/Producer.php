@@ -12,4 +12,12 @@ class Producer extends Model
     {
         return $this->belongsTo(User::class, 'dni', 'dni');
     }
+
+    /**
+     * Obtiene todas las cosechas asociadas al productor.
+     */
+    public function harvests()
+    {
+        return $this->hasMany(Harvest::class, 'producer_id');
+    }
 }
