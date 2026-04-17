@@ -12,6 +12,8 @@ use Illuminate\Support\Facades\DB;
 use Livewire\Attributes\On;
 use Lunar\FieldTypes\TranslatedText;
 use Lunar\Models\TaxClass;
+use Lunar\Models\Currency;
+use Lunar\Models\Price;
 
 new class extends Component {
     public $product_type_id;
@@ -67,11 +69,12 @@ new class extends Component {
                 'tax_class_id' => TaxClass::getDefault()->id,
             ]);
 
+
             Price::create([
                 'priceable_type' => ProductVariant::class,
                 'priceable_id' => $variant->id,
                 'currency_id' => Currency::getDefault()->id,
-                'price' => $this->price * 100, // Lunar usa céntimos
+                'price' => $this->price * 100,
             ]);
 
             // 3. Vincular la cosecha con la variante de Lunar

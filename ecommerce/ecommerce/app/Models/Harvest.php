@@ -22,7 +22,7 @@ class Harvest extends Model
     ];
     public function producer()
     {
-        return $this->belongsTo(Producer::class, 'producer_dni', 'dni');
+        return $this->belongsTo(Producer::class, 'producer_id');
     }
 
     public function productType()
