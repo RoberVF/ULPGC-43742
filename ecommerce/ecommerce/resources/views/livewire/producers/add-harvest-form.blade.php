@@ -12,8 +12,6 @@ use Illuminate\Support\Facades\DB;
 use Livewire\Attributes\On;
 use Lunar\FieldTypes\TranslatedText;
 use Lunar\Models\TaxClass;
-use Lunar\Models\Currency;
-use Lunar\Models\Price;
 
 new class extends Component {
     public $product_type_id;
@@ -24,9 +22,17 @@ new class extends Component {
     public $temperature;
     public $humidity;
 
+    public function mount()
+    {
+        $types = ProductType::all();
+        if ($types->count() === 1) {
+            $this->product_type_id = $types->first()->id;
+        }
+    }
+
     public function save()
     {
-        $validated = $this->validate([
+        $this->validate([
             'product_type_id' => 'required|exists:product_types,id',
             'collect_date' => 'required|date',
             'quantity' => 'required|numeric|min:0',
@@ -36,26 +42,35 @@ new class extends Component {
             'humidity' => 'nullable|numeric',
         ]);
 
-        DB::transaction(function () use ($validated) {
-            $producer = auth()->user()->producer;
+        // 1. Pre-verificación de cimientos (Si esto falla, no entramos en la transacción)
+        $currency = Currency::getDefault() ?? Currency::where('code', 'EUR')->first();
+        $lunarType = LunarProductType::first();
+        // Buscamos una clase de impuesto de forma segura
+        $taxClass = TaxClass::where('default', 1)->first() ?? TaxClass::first();
 
-            // 1. Crear la cosecha en TU lógica
+        if (!$currency || !$lunarType || !$taxClass) {
+            $this->js("Flux.toast({ variant: 'danger', title: 'Error Crítico', description: 'Faltan datos base en Lunar (Moneda, Tipo o Impuestos).' })");
+            return;
+        }
+
+        DB::transaction(function () use ($currency, $lunarType, $taxClass) {
+            // 2. Crear Cosecha propia
             $harvest = Harvest::create([
-                'producer_id' => $producer->id,
+                'producer_id' => auth()->user()->producer->id,
                 'product_type_id' => $this->product_type_id,
                 'collect_date' => $this->collect_date,
                 'quantity' => $this->quantity,
-                'stock' => $this->quantity, // Al empezar, el stock es igual a la cantidad
+                'stock' => $this->quantity,
                 'price' => $this->price,
                 'unit_measure' => $this->unit_measure,
                 'temperature' => $this->temperature,
                 'humidity' => $this->humidity,
             ]);
 
-            // 2. Crear el "Espejo" en Lunar para el carrito
+            // 3. Crear Producto Lunar
             $lunarProduct = Product::create([
                 'status' => 'published',
-                'product_type_id' => LunarProductType::first()->id,
+                'product_type_id' => $lunarType->id,
                 'attribute_data' => [
                     'name' => new TranslatedText([
                         'en' => "Cosecha #{$harvest->id} - " . \App\Models\ProductType::find($this->product_type_id)->name,
@@ -63,27 +78,29 @@ new class extends Component {
                 ],
             ]);
 
+            // 4. Crear Variante
             $variant = ProductVariant::create([
                 'product_id' => $lunarProduct->id,
-                'sku' => "HARV-{$harvest->id}",
-                'tax_class_id' => TaxClass::getDefault()->id,
+                'sku' => "HARV-{$harvest->id}-" . uniqid(), // SKU siempre único
+                'tax_class_id' => $taxClass->id,
+                'stock' => (int) $this->quantity,
+                'purchasable' => 'always',
             ]);
 
-
-            Price::create([
-                'priceable_type' => ProductVariant::class,
-                'priceable_id' => $variant->id,
-                'currency_id' => Currency::getDefault()->id,
-                'price' => $this->price * 100,
+            // 5. CREACIÓN DEL PRECIO (Vía Relación - No puede fallar)
+            $variant->prices()->create([
+                'currency_id' => $currency->id,
+                'price' => (int) ($this->price * 100),
+                'min_quantity' => 1,
             ]);
 
-            // 3. Vincular la cosecha con la variante de Lunar
+            // 6. Vincular
             $harvest->update(['lunar_variant_id' => $variant->id]);
         });
 
-        $this->reset();
+        $this->reset(['collect_date', 'quantity', 'price', 'temperature', 'humidity']);
         $this->dispatch('harvest-added');
-        $this->js("Flux.toast('Cosecha registrada y publicada en el marketplace')");
+        $this->js("Flux.toast('Cosecha publicada correctamente')");
     }
 
     public function with()
@@ -94,7 +111,10 @@ new class extends Component {
     }
 
     #[On('product-type-created')]
-    public function refreshTypes() {}
+    public function refreshTypes()
+    {
+        $this->mount(); // Re-chequeamos si hay uno solo para auto-seleccionar
+    }
 }; ?>
 
 <flux:card class="space-y-6 mb-4">
@@ -102,14 +122,13 @@ new class extends Component {
         <flux:heading size="lg">Registrar Nueva Cosecha</flux:heading>
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <flux:select wire:model="product_type_id" label="Tipo de Producto" placeholder="Selecciona...">
+            <flux:select wire:model.live="product_type_id" label="Tipo de Producto" placeholder="Selecciona...">
                 @foreach ($types as $type)
                     <flux:select.option value="{{ $type->id }}">{{ $type->name }}</flux:select.option>
                 @endforeach
             </flux:select>
 
             <flux:input wire:model="collect_date" type="date" label="Fecha de Recogida" />
-
             <flux:input wire:model="quantity" type="number" step="0.01" label="Cantidad Total" />
 
             <flux:select wire:model="unit_measure" label="Unidad">

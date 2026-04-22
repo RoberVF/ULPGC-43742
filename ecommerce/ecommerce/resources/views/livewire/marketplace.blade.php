@@ -24,10 +24,10 @@ new class extends Component {
     public function with()
     {
         return [
-            // Solo mostramos cosechas que tengan stock y estén vinculadas a Lunar
             'harvests' => Harvest::with(['productType', 'producer.user'])
                 ->where('stock', '>', 0)
                 ->whereNotNull('lunar_variant_id')
+                // ->whereHas('lunarVariant.prices')
                 ->get(),
         ];
     }
