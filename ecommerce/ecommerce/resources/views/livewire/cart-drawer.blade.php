@@ -18,7 +18,6 @@ new class extends Component {
     {
         CartSession::remove($lineId);
 
-        // Avisamos a los demás componentes y a nosotros mismos de que cambió
         $this->dispatch('cart-updated');
 
         $this->js("Flux.toast('Producto eliminado')");
@@ -31,17 +30,37 @@ new class extends Component {
     @if ($cart && $cart->lines->count() > 0)
         <div class="space-y-4">
             @foreach ($cart->lines as $line)
-                <div class="flex justify-between items-center border-b pb-2">
-                    <div>
-                        <p class="font-medium text-sm">{{ $line->purchasable->product->attr('name') }}</p>
-                        <p class="text-xs text-zinc-500">{{ $line->quantity }} x {{ $line->unitPrice->formatted }}</p>
+                @php
+                    $harvest = \App\Models\Harvest::where('lunar_variant_id', $line->purchasable->id)->first();
+                    $unit = $harvest->unit_measure ?? 'ud';
+                @endphp
+
+                <div class="py-4 border-b border-gray-700 last:border-0">
+                    <div class="flex justify-between items-start mb-1">
+                        <span
+                            class="font-bold text-white">{{ $line->purchasable->product->translateAttribute('name') }}</span>
+
+                        <button wire:click="removeItem({{ $line->id }})"
+                            class="text-gray-400 hover:text-red-500 transition-colors duration-200">
+                            <flux:icon.trash variant="micro" />
+                        </button>
                     </div>
-                    <flux:button wire:click="removeItem({{ $line->id }})" variant="ghost" icon="trash"
-                        size="sm" />
+
+                    <div class="flex justify-between items-end text-sm">
+                        <div class="text-gray-500">
+                            {{ $line->quantity }}{{ $unit }} x
+                            {{ $line->unitPrice->formatted() }}/{{ $unit }}
+                        </div>
+
+                        <div class="text-right">
+                            <span class="text-xs text-gray-400 block uppercase tracking-wider">Subtotal</span>
+                            <span class="font-semibold text-white">{{ $line->subTotal->formatted() }}</span>
+                        </div>
+                    </div>
                 </div>
             @endforeach
 
-            <div class="pt-4 border-t">
+            <div class="pt-4">
                 <div class="flex justify-between font-bold">
                     <span>Total:</span>
                     <span>{{ $cart->total->formatted }}</span>

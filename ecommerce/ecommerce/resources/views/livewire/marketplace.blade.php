@@ -71,7 +71,7 @@ new class extends Component {
                     <div class="flex gap-2">
                         <flux:input wire:model="quantities.{{ $harvest->lunar_variant_id }}" type="number"
                             min="1" :invalid="$errors->has('quantities.'.$harvest->lunar_variant_id)"
-                            placeholder="Cant." class="w-24" />
+                            placeholder="Cant. {{ $harvest->unit_measure }}" class="w-24" />
 
                         <flux:button wire:click="addToCart({{ $harvest->lunar_variant_id }})" variant="primary"
                             class="flex-1">
