@@ -5,20 +5,38 @@ use Lunar\Facades\CartSession;
 use Livewire\Volt\Component;
 
 new class extends Component {
-    // Función para añadir al carrito de Lunar
+    public array $quantities = [];
     public function addToCart($variantId)
     {
-        $purchasable = \Lunar\Models\ProductVariant::find($variantId);
+        $this->resetErrorBag("quantities.$variantId");
 
-        if ($purchasable) {
-            \Lunar\Facades\CartSession::add($purchasable, 1);
+        $requestedQty = (int) ($this->quantities[$variantId] ?? 1);
+        $variant = \Lunar\Models\ProductVariant::find($variantId);
 
-            $this->dispatch('cart-updated');
-
-            $this->js("Flux.toast('Añadido al carrito correctamente')");
-        } else {
-            $this->js("Flux.toast({ variant: 'danger', title: 'Error', description: 'No se encontró el producto' })");
+        if (!$variant) {
+            $this->addError("quantities.$variantId", 'El producto ya no existe.');
+            return;
         }
+
+        if ($requestedQty > $variant->stock) {
+            $this->addError("quantities.$variantId", "Solo quedan {$variant->stock} disponibles.");
+            return;
+        }
+
+        $currentCart = \Lunar\Facades\CartSession::current();
+        $existingLine = $currentCart?->lines()->where('purchasable_id', $variantId)->first();
+        $qtyInCart = $existingLine?->quantity ?? 0;
+
+        if ($requestedQty + $qtyInCart > $variant->stock) {
+            $this->addError("quantities.$variantId", "Ya tienes $qtyInCart en el carrito. No puedes añadir $requestedQty más.");
+            return;
+        }
+
+        \Lunar\Facades\CartSession::add($variant, $requestedQty);
+
+        $this->dispatch('cart-updated');
+        $this->js("Flux.toast('Añadido al carrito correctamente')");
+        $this->quantities[$variantId] = 1;
     }
 
     public function with()
@@ -27,7 +45,6 @@ new class extends Component {
             'harvests' => Harvest::with(['productType', 'producer.user'])
                 ->where('stock', '>', 0)
                 ->whereNotNull('lunar_variant_id')
-                // ->whereHas('lunarVariant.prices')
                 ->get(),
         ];
     }
@@ -36,32 +53,36 @@ new class extends Component {
 <div class="space-y-6">
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         @foreach ($harvests as $harvest)
-            <flux:card class="flex flex-col justify-between">
-                <div class="space-y-4">
-                    <div class="flex justify-between items-start">
-                        <div>
-                            <flux:heading size="lg">
-                                {{ $harvest->productType->name ?? 'Tipo de producto no disponible' }}</flux:heading>
-                            <flux:subheading>Producido por:
-                                {{ $harvest->producer->user->name ?? 'Productor desconocido' }}</flux:subheading>
-                        </div>
-                        <flux:badge color="green" size="sm" inset="top">{{ $harvest->price }}€ /
-                            {{ $harvest->unit_measure }}</flux:badge>
-                    </div>
-
-                    <div class="flex gap-4 text-xs text-zinc-500">
-                        <span class="flex items-center gap-1">
-                            <flux:icon.calendar variant="micro" /> {{ $harvest->collect_date }}
-                        </span>
-                        <span class="flex items-center gap-1"><flux:icon.archive-box variant="micro" /> Stock:
-                            {{ $harvest->stock }}</span>
-                    </div>
+            <flux:card class="space-y-4">
+                <div class="flex justify-between">
+                    <flux:heading size="lg">{{ $harvest->productType->name }}</flux:heading>
+                    <flux:badge variant="success" size="sm">
+                        {{ number_format($harvest->price, 2) }}€ / {{ $harvest->unit_measure }}
+                    </flux:badge>
                 </div>
 
-                <flux:button wire:click="addToCart({{ $harvest->lunar_variant_id }})" variant="primary"
-                    icon="shopping-cart" class="mt-6 w-full">
-                    Añadir
-                </flux:button>
+                <div class="flex items-center gap-2 text-sm text-gray-500">
+                    <flux:icon.archive-box variant="micro" />
+                    <span>Disponible: <strong>{{ number_format($harvest->stock, 2) }}
+                            {{ $harvest->unit_measure }}</strong></span>
+                </div>
+
+                <div class="flex flex-col gap-2">
+                    <div class="flex gap-2">
+                        <flux:input wire:model="quantities.{{ $harvest->lunar_variant_id }}" type="number"
+                            min="1" :invalid="$errors->has('quantities.'.$harvest->lunar_variant_id)"
+                            placeholder="Cant." class="w-24" />
+
+                        <flux:button wire:click="addToCart({{ $harvest->lunar_variant_id }})" variant="primary"
+                            class="flex-1">
+                            Añadir
+                        </flux:button>
+                    </div>
+
+                    @error('quantities.' . $harvest->lunar_variant_id)
+                        <span class="text-xs text-red-500 font-medium">{{ $message }}</span>
+                    @enderror
+                </div>
             </flux:card>
         @endforeach
     </div>
