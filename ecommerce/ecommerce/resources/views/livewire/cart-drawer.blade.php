@@ -65,7 +65,7 @@ new class extends Component {
                     <span>Total:</span>
                     <span>{{ $cart->total->formatted }}</span>
                 </div>
-                <flux:button variant="primary" class="w-full mt-4">Finalizar Compra</flux:button>
+                <flux:button variant="primary" class="w-full mt-4" href="{{ route('checkout') }}">Finalizar Compra</flux:button>
             </div>
         </div>
     @else

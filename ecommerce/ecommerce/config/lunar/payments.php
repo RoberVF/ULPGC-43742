@@ -1,14 +1,10 @@
 <?php
 
 return [
-
-    'default' => env('PAYMENTS_TYPE', 'cash-in-hand'),
-
+    'default' => 'card',
     'types' => [
-        'cash-in-hand' => [
-            'driver' => 'offline',
-            'authorized' => 'payment-offline',
+        'card' => [
+            'driver' => 'stripe',
         ],
     ],
-
 ];
