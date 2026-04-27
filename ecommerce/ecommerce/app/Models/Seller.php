@@ -12,4 +12,14 @@ class Seller extends Model
     {
         return $this->belongsTo(User::class, 'dni', 'dni');
     }
+
+    public function inventory()
+    {
+        return $this->hasMany(SellerInventory::class);
+    }
+
+    public function listings()
+    {
+        return $this->hasMany(SellerListing::class);
+    }
 }

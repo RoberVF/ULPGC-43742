@@ -74,4 +74,19 @@ class User extends Authenticatable implements LunarUserInterface
     {
         return $this->hasOne(Client::class);
     }
+
+    public function isProducer(): bool
+    {
+        return $this->producer()->exists();
+    }
+
+    public function isSeller(): bool
+    {
+        return $this->seller()->exists();
+    }
+
+    public function isClient(): bool
+    {
+        return $this->client()->exists();
+    }
 }

@@ -3,22 +3,37 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Lunar\Models\Order;
 
 class SellerInventory extends Model
 {
     protected $table = 'seller_inventory';
-    public $timestamps = false;
-    protected $fillable = ['seller_dni', 'harvest_id', 'stock', 'sale_price'];
-    protected $primaryKey = ['seller_dni', 'harvest_id'];
-    public $incrementing = false;
+
+    protected $fillable = [
+        'seller_id',
+        'harvest_id',
+        'order_id',
+        'quantity_purchased',
+        'quantity_remaining',
+    ];
 
     public function seller()
     {
-        return $this->belongsTo(Seller::class, 'seller_dni', 'dni');
+        return $this->belongsTo(Seller::class);
     }
 
     public function harvest()
     {
-        return $this->belongsTo(Harvest::class, 'harvest_id');
+        return $this->belongsTo(Harvest::class);
+    }
+
+    public function order()
+    {
+        return $this->belongsTo(Order::class);
+    }
+
+    public function listings()
+    {
+        return $this->hasMany(SellerListing::class);
     }
 }

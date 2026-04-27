@@ -1,8 +1,8 @@
 <?php
-// resources/views/livewire/order-success.blade.php
 
 use Lunar\Facades\CartSession;
 use App\Models\Harvest;
+use App\Models\SellerInventory;
 use Livewire\Volt\Component;
 use Illuminate\Support\Facades\DB;
 
@@ -15,7 +15,6 @@ new class extends Component {
             return redirect()->route('home');
         }
 
-        // Verificar estado directamente en Stripe
         \Stripe\Stripe::setApiKey(config('services.stripe.key'));
         $intent = \Stripe\PaymentIntent::retrieve($paymentIntentId);
 
@@ -23,27 +22,54 @@ new class extends Component {
             return redirect()->route('checkout');
         }
 
-        // Buscar la orden por el cart que tiene este intent
-        $order = \Lunar\Models\Order::where('status', 'awaiting-payment')->latest()->first();
+        $order = \Lunar\Models\Order::where('status', 'awaiting-payment')
+            ->latest()
+            ->first();
 
         if (!$order) {
             return redirect()->route('home');
         }
 
-        DB::transaction(function () use ($order) {
+        $buyer = auth()->user();
+
+        DB::transaction(function () use ($order, $buyer) {
             $order->update(['status' => 'paid']);
 
             foreach ($order->lines as $line) {
                 $variant = $line->purchasable;
-                if (!$variant) {
-                    continue;
-                }
+                if (!$variant) continue;
 
-                $variant->decrement('stock', $line->quantity);
+                $quantity = $line->quantity;
 
-                $harvest = \App\Models\Harvest::where('lunar_variant_id', $variant->id)->first();
+                // Reducir stock de Lunar y de la cosecha
+                $variant->decrement('stock', $quantity);
+
+                $harvest = Harvest::where('lunar_variant_id', $variant->id)->first();
                 if ($harvest) {
-                    $harvest->decrement('stock', $line->quantity);
+                    $harvest->decrement('stock', $quantity);
+
+                    // ✅ Si el comprador es vendedor, crear inventario
+                    if ($buyer->isSeller()) {
+                        $seller = $buyer->seller;
+
+                        // Acumular si ya compró esta cosecha antes
+                        $existing = SellerInventory::where('seller_id', $seller->id)
+                            ->where('harvest_id', $harvest->id)
+                            ->first();
+
+                        if ($existing) {
+                            $existing->increment('quantity_purchased', $quantity);
+                            $existing->increment('quantity_remaining', $quantity);
+                        } else {
+                            SellerInventory::create([
+                                'seller_id'          => $seller->id,
+                                'harvest_id'         => $harvest->id,
+                                'order_id'           => $order->id,
+                                'quantity_purchased' => $quantity,
+                                'quantity_remaining' => $quantity,
+                            ]);
+                        }
+                    }
                 }
             }
 
@@ -56,8 +82,14 @@ new class extends Component {
     <flux:card class="space-y-4">
         <flux:icon.check-circle variant="solid" class="text-green-500 size-12 mx-auto" />
         <flux:heading size="xl">¡Pago completado!</flux:heading>
-        <p class="text-white">Tu pedido ha sido procesado y el stock se ha actualizado correctamente.</p>
-
-        <flux:button href="/dashboard" variant="primary">Volver al Mercado</flux:button>
+        <p class="text-gray-600">Tu pedido ha sido procesado correctamente.</p>
+        @if(auth()->user()->isSeller())
+            <p class="text-sm text-blue-500">El stock ha sido añadido a tu inventario.</p>
+            <flux:button href="{{ route('seller.dashboard') }}" variant="primary">
+                Ver mi inventario
+            </flux:button>
+        @else
+            <flux:button href="{{ route('home') }}" variant="primary">Volver al inicio</flux:button>
+        @endif
     </flux:card>
 </div>

@@ -19,6 +19,7 @@ class Harvest extends Model
         'temperature',
         'humidity',
         'lunar_variant_id',
+        'published',
     ];
     public function producer()
     {
