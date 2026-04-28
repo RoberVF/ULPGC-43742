@@ -11,6 +11,22 @@ Route::view('dashboard', 'dashboard')
     ->middleware(['auth', 'verified'])
     ->name('dashboard');
 
+Route::get('/terms-and-services', function () {
+    return view('livewire.legit.terms-and-services');
+})->name('terms-and-services');
+
+Route::get('/privacy-policy', function () {
+    return view('livewire.legit.privacy-policy');
+})->name('privacy-policy');
+
+Route::get('/cookies', function () {
+    return view('livewire.legit.cookies');
+})->name('cookies');
+
+Route::get('/licenses', function () {
+    return view('livewire.legit.licenses');
+})->name('licenses');
+
 Route::middleware(['auth'])->group(function () {
     Route::redirect('settings', 'settings/profile');
     Volt::route('settings/profile', 'settings.profile')->name('settings.profile');

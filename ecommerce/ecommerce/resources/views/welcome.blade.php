@@ -733,15 +733,15 @@
                 <div>
                     <h4 class="font-semibold mb-4">Legal</h4>
                     <ul class="space-y-3">
-                        <li><a href="#"
+                        <li><a href="/terms-and-services"
                                 class="text-sm text-zinc-500 hover:text-white transition-colors">Terminos de
                                 Servicio</a></li>
-                        <li><a href="#"
+                        <li><a href="/privacy-policy"
                                 class="text-sm text-zinc-500 hover:text-white transition-colors">Politica de
                                 Privacidad</a></li>
-                        <li><a href="#"
+                        <li><a href="/cookies"
                                 class="text-sm text-zinc-500 hover:text-white transition-colors">Cookies</a></li>
-                        <li><a href="#"
+                        <li><a href="/licenses"
                                 class="text-sm text-zinc-500 hover:text-white transition-colors">Licencias</a></li>
                     </ul>
                 </div>

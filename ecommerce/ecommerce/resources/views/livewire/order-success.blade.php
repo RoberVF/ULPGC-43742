@@ -85,9 +85,9 @@ new class extends Component {
         <p class="text-gray-600">Tu pedido ha sido procesado correctamente.</p>
         @if(auth()->user()->isSeller())
             <p class="text-sm text-blue-500">El stock ha sido añadido a tu inventario.</p>
-            <flux:button href="{{ route('seller.dashboard') }}" variant="primary">
+            {{-- <flux:button href="{{ route('sellers.dashboard') }}" variant="primary">
                 Ver mi inventario
-            </flux:button>
+            </flux:button> --}}
         @else
             <flux:button href="{{ route('home') }}" variant="primary">Volver al inicio</flux:button>
         @endif
