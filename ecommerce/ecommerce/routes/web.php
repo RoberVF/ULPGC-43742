@@ -32,6 +32,7 @@ Route::middleware(['auth'])->group(function () {
     Volt::route('settings/profile', 'settings.profile')->name('settings.profile');
     Volt::route('settings/password', 'settings.password')->name('settings.password');
     Volt::route('settings/appearance', 'settings.appearance')->name('settings.appearance');
+    Volt::route('/wall', 'wall')->name('wall');
 
     Route::middleware('auth')->group(function () {
         Volt::route('/checkout', 'checkout')->name('checkout');
@@ -49,6 +50,10 @@ Route::middleware(['auth'])->group(function () {
     Route::middleware('seller')->group(function () {
         Volt::route('/seller/dashboard', 'sellers.dashboard')->name('seller.dashboard');
         Volt::route('/producer-market', 'sellers.producer-market')->name('producer.market');
+    });
+
+    Route::middleware('not_client')->group(function () {
+        Volt::route('/wall', 'wall')->name('wall');
     });
 });
 

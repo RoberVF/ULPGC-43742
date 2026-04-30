@@ -15,6 +15,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'producer' => \App\Http\Middleware\EnsureIsProducer::class,
             'client'   => \App\Http\Middleware\EnsureIsClient::class,
             'seller'   => \App\Http\Middleware\EnsureIsSeller::class,
+            'not_client' => \App\Http\Middleware\EnsureIsNotClient::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
