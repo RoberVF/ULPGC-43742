@@ -9,7 +9,17 @@ new class extends Component {
 
     public function mount()
     {
-        $cart = CartSession::current();
+        try {
+            $cart = CartSession::current();
+        } catch (\Exception $e) {
+            CartSession::forget();
+            return redirect()->route('marketplace');
+        }
+
+        if (!$cart || $cart->lines->isEmpty()) {
+            return redirect()->route('marketplace');
+        }
+        // $cart = CartSession::current();
 
         if (!$cart || $cart->lines->isEmpty()) {
             return redirect()->to('/dashboard');

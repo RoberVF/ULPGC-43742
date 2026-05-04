@@ -43,16 +43,17 @@ new #[Layout('components.layouts.auth')] class extends Component {
         $user = auth()->user();
 
         if ($user->isClient()) {
-            $this->redirectIntended(default: route('marketplace', absolute: false), navigate: true);
-            return; // ✅
+            \Lunar\Facades\CartSession::forget();
+            $this->redirect(route('marketplace', absolute: false), navigate: true);
+            return;
         }
         if ($user->isProducer()) {
             $this->redirectIntended(default: route('producer.dashboard', absolute: false), navigate: true);
-            return; // ✅
+            return;
         }
         if ($user->isSeller()) {
             $this->redirectIntended(default: route('seller.dashboard', absolute: false), navigate: true);
-            return; // ✅
+            return;
         }
     }
 
