@@ -57,4 +57,19 @@ Route::middleware(['auth'])->group(function () {
     });
 });
 
+
+
+// Rutas para categorías y productos
+Route::get('/practica-evaluable/categorias', [App\Http\Controllers\Rr8CategoriaController::class, 'index'])->name('categorias.index');
+Route::get('/practica-evaluable/productos', [App\Http\Controllers\Rr8ProductoController::class, 'index'])->name('productos.index');
+Route::get('/practica-evaluable/productos/{id}/produccion', [App\Http\Controllers\Rr8ProductoController::class, 'showProduccion'])->name('productos.produccion');
+
+// PRACTICA EVALUABLE
+Route::get('/practica-evaluable/{nombre}', function($nombre) {
+    return view("livewire.practica-evaluable.{$nombre}");
+})->name('pagina.personal');
+
+
+
+
 require __DIR__ . '/auth.php';
